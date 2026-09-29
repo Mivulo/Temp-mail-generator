@@ -59,8 +59,8 @@
         let currentEmail = "";
 
         function generateEmail() {
-            const randomString = Math.random().toString(36.substring(2, 10)) + Math.floor(Math.random() * 1000);
-            currentEmail = mivylo_${randomString}@mivylo.my.id;
+            const randomString = Math.random().toString(36).substring(2, 10) + Math.floor(Math.random() * 1000);
+            currentEmail = "mivylo_" + randomString + "@mivylo.my.id";
             document.getElementById('emailDisplay').value = currentEmail;
             document.getElementById('inboxList').innerHTML = "Belum ada email masuk. Pesan akan muncul di sini secara otomatis.";
         }
@@ -69,7 +69,7 @@
             document.getElementById('statusText').innerText = "Memeriksa...";
             setTimeout(() => {
                 document.getElementById('statusText').innerText = "Diperbarui (Kotak Masuk Kosong)";
-            }, 600);
+            }, 500);
         }
 
         function copyEmail() {
