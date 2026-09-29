@@ -20,10 +20,12 @@
         .btn-action:hover { background: #c2185b; }
         .btn-refresh { background: #f8f9fa; color: #555; width: 100%; border: 1px solid #ddd; }
         .btn-refresh:hover { background: #e9ecef; }
+        .custom-box { margin-bottom: 15px; background: #fff0f3; padding: 12px; border-radius: 12px; border: 1px dashed #ffb6c1; }
+        .custom-box input { margin-bottom: 8px; }
         .inbox { margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; }
         .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .inbox-header h3 { font-size: 14px; color: #333; }
-        #statusText { font-size: 12px; color: #888; text-align: right; margin-bottom: 20px; }
+        #statusText { font-size: 12px; color: #888; text-align: right; margin-bottom: 15px; }
         .inbox-list { background: #fff9fa; border: 2px dashed #ffb6c1; border-radius: 12px; padding: 20px; text-align: center; color: #888; font-size: 13px; max-height: 180px; overflow-y: auto; }
         #copyAlert { font-size: 11px; color: #e91e63; text-align: right; margin-top: 5px; display: none; }
     </style>
@@ -34,6 +36,15 @@
         <h1>🌸 Mivylo Temp Mail</h1>
         <p class="sub">Email sementara instan, aman, dan aesthetic</p>
 
+        <!-- Bagian Custom Email -->
+        <div class="custom-box">
+            <label>Buat Nama Email Sendiri</label>
+            <div class="input-group">
+                <input type="text" id="customInput" placeholder="ketiknamasendiri">
+                <button class="btn-copy" onclick="setCustomEmail()" style="white-space: nowrap;">Pakai</button>
+            </div>
+        </div>
+
         <label>Alamat Email Anda</label>
         <div class="input-group">
             <input type="text" id="emailDisplay" readonly value="Memuat email...">
@@ -43,7 +54,7 @@
         <div id="statusText">Aktif dan siap digunakan</div>
 
         <button class="btn-action" onclick="fetchInbox()">🔄 Cek Kotak Masuk</button>
-        <button class="btn-refresh" onclick="generateEmail()">Ganti Email Baru</button>
+        <button class="btn-refresh" onclick="generateEmail()">Ganti Email Acak</button>
 
         <div class="inbox">
             <div class="inbox-header">
@@ -61,9 +72,25 @@
         function generateEmail() {
             let prefix = Math.random().toString(36).substring(2, 8);
             let suffix = Math.random().toString(36).substring(2, 8);
-            currentEmail = suffix + "@mivylo.my.id";
+            currentEmail = prefix + suffix + "@mivylo.my.id";
             
             document.getElementById('emailDisplay').value = currentEmail;
+            document.getElementById('customInput').value = "";
+            document.getElementById('inboxList').innerHTML = "Belum ada email masuk. Pesan akan muncul di sini secara otomatis.";
+        }
+
+        function setCustomEmail() {
+            let customName = document.getElementById('customInput').value.trim().toLowerCase();
+            if (!customName) {
+                alert("Masukkan nama email terlebih dahulu!");
+                return;
+            }
+            // Bersihkan spasi atau karakter aneh jika ada
+            customName = customName.replace(/[^a-z0-9._-]/g, '');
+            currentEmail = customName + "@mivylo.my.id";
+            
+            document.getElementById('emailDisplay').value = currentEmail;
+            document.getElementById('statusText').innerText = "Email custom aktif";
             document.getElementById('inboxList').innerHTML = "Belum ada email masuk. Pesan akan muncul di sini secara otomatis.";
         }
 
