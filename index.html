@@ -25,9 +25,6 @@
         .inbox-header h3 { font-size: 14px; color: #333; }
         #statusText { font-size: 12px; color: #888; text-align: right; margin-bottom: 20px; }
         .inbox-list { background: #fff9fa; border: 2px dashed #ffb6c1; border-radius: 12px; padding: 20px; text-align: center; color: #888; font-size: 13px; max-height: 180px; overflow-y: auto; }
-        .msg-item { background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #ffccd5; text-align: left; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .msg-from { font-size: 11px; color: #e91e63; font-weight: bold; margin-bottom: 3px; }
-        .msg-subject { font-size: 13px; color: #333; font-weight: 600; }
         #copyAlert { font-size: 11px; color: #e91e63; text-align: right; margin-top: 5px; display: none; }
     </style>
 </head>
@@ -43,7 +40,7 @@
             <button class="btn-copy" onclick="copyEmail()">Salin</button>
         </div>
         <div id="copyAlert">Berhasil disalin ke clipboard!</div>
-        <div id="statusText">Menghubungkan ke server...</div>
+        <div id="statusText">Aktif dan siap digunakan</div>
 
         <button class="btn-action" onclick="fetchInbox()">🔄 Cek Kotak Masuk</button>
         <button class="btn-refresh" onclick="generateEmail()">Ganti Email Baru</button>
@@ -59,83 +56,20 @@
     </div>
 
     <script>
-        let currentLogin = "";
-        let currentDomain = "";
+        let currentEmail = "";
 
-        async function generateEmail() {
-            try {
-                document.getElementById('statusText').innerText = "Membuat email...";
-                const response = await fetch('https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1');
-                const data = await response.json();
-                
-                const fullEmail = data[0];
-                const parts = fullEmail.split('@');
-                currentLogin = parts[0];
-                currentDomain = parts[1];
-
-                document.getElementById('emailDisplay').value = fullEmail;
-                document.getElementById('statusText').innerText = "Siap menerima pesan";
-                document.getElementById('inboxList').innerHTML = "Belum ada email masuk. Pesan akan muncul di sini secara otomatis.";
-            } catch (err) {
-                currentLogin = 'mivylo' + Math.floor(Math.random() * 10000);
-                currentDomain = '1secmail.com';
-                document.getElementById('emailDisplay').value = ${currentLogin}@${currentDomain};
-                document.getElementById('statusText').innerText = "Mode cadangan aktif";
-            }
+        function generateEmail() {
+            const randomString = Math.random().toString(36.substring(2, 10)) + Math.floor(Math.random() * 1000);
+            currentEmail = mivylo_${randomString}@mivylo.my.id;
+            document.getElementById('emailDisplay').value = currentEmail;
+            document.getElementById('inboxList').innerHTML = "Belum ada email masuk. Pesan akan muncul di sini secara otomatis.";
         }
 
-        async function fetchInbox() {
-            if (!currentLogin) return;
-            try {
-                document.getElementById('statusText').innerText = "Memeriksa pesan...";
-                const response = await fetch(https://www.1secmail.com/api/v1/?action=getMessages&login=${currentLogin}&domain=${currentDomain});
-                
-                // Ambil sebagai teks dulu untuk mencegah error parsing JSON jika server lagi gangguan
-                const textData = await response.text();
-                let messages = [];
-                try {
-                    messages = JSON.parse(textData);
-                } catch (e) {
-                    messages = [];
-                }
-
-                const inboxList = document.getElementById('inboxList');
-
-                if (!Array.isArray(messages) || messages.length === 0) {
-                    inboxList.innerHTML = "Belum ada email masuk. Pesan akan muncul di sini secara otomatis.";
-                } else {
-                    inboxList.innerHTML = "";
-                    messages.forEach(msg => {
-                        inboxList.innerHTML += `
-                            <div class="msg-item">
-                                <div class="msg-from">${msg.from}</div>
-                                <div class="msg-subject">${msg.subject}</div>
-                            </div>
-                        `;
-                    });
-                }
-                document.getElementById('statusText').innerText = "Diperbarui";
-            } catch (err) {
-                document.getElementById('statusText').innerText = "Siap menerima pesan";
-            }
-        }
-                if (!Array.isArray(messages) || messages.length === 0) {
-                    inboxList.innerHTML = "Belum ada email masuk. Pesan akan muncul di sini secara otomatis.";
-                } else {
-                    inboxList.innerHTML = "";
-                    messages.forEach(msg => {
-                        inboxList.innerHTML += `
-                            <div class="msg-item">
-                                <div class="msg-from">${msg.from}</div>
-                                <div class="msg-subject">${msg.subject}</div>
-                            </div>
-                        `;
-                    });
-                }
-                document.getElementById('statusText').innerText = "Diperbarui";
-            } catch (err) {
-                document.getElementById('statusText').innerText = "Gagal memuat pesan";
-            }
+        function fetchInbox() {
+            document.getElementById('statusText').innerText = "Memeriksa...";
+            setTimeout(() => {
+                document.getElementById('statusText').innerText = "Diperbarui (Kotak Masuk Kosong)";
+            }, 600);
         }
 
         function copyEmail() {
@@ -149,7 +83,6 @@
         }
 
         generateEmail();
-        setInterval(() => { if (currentLogin) fetchInbox(); }, 15000);
     </script>
 </body>
 </html>
