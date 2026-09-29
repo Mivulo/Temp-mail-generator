@@ -32,7 +32,7 @@
 
     <div class="card">
         <h1>🌸 Mivylo Temp Mail</h1>
-        <p class="sub">Email sementara instan, aman, dan estetik.</p>
+        <p class="sub">Email sementara instan, aman, dan aesthetic</p>
 
         <label>Alamat Email Anda</label>
         <div class="input-group">
@@ -59,8 +59,10 @@
         let currentEmail = "";
 
         function generateEmail() {
-            const randomString = Math.random().toString(36).substring(2, 10) + Math.floor(Math.random() * 1000);
-            currentEmail = "mivylo_" + randomString + "@mivylo.my.id";
+            let prefix = Math.random().toString(36).substring(2, 8);
+            let suffix = Math.random().toString(36).substring(2, 6);
+            currentEmail = prefix + suffix + "@mivylo.my.id";
+            
             document.getElementById('emailDisplay').value = currentEmail;
             document.getElementById('inboxList').innerHTML = "Belum ada email masuk. Pesan akan muncul di sini secara otomatis.";
         }
