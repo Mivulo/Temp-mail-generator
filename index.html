@@ -72,7 +72,7 @@
         function generateEmail() {
             let prefix = Math.random().toString(36).substring(2, 8);
             let suffix = Math.random().toString(36).substring(2, 8);
-            currentEmail = prefix + suffix + "@mivylo.my.id";
+            currentEmail = suffix + "@mivylo.my.id";
             
             document.getElementById('emailDisplay').value = currentEmail;
             document.getElementById('customInput').value = "";
