@@ -1,13 +1,131 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PinkTempMail - Mivylo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-pink-100 via-rose-100 to-pink-200 min-h-screen flex items-center justify-center p-4">
+<div class="bg-white/90 backdrop-blur-md shadow-xl rounded-2xl w-full max-w-lg p-6 md:p-8 border border-pink-200">
+        <h1 class="text-2xl font-bold text-rose-600 text-center mb-2">🌸 Mivylo Temp Mail</h1>
+        <p class="text-gray-500 text-center text-sm mb-6">Email sementara instan, aman, dan estetik.</p>
+
+        <!-- Kotak Email -->
+        <div class="mb-6">
+            <label class="block text-xs font-semibold text-rose-500 uppercase tracking-wider mb-2">Alamat Email Anda</label>
+            <div class="flex gap-2">
+                <input type="text" id="emailDisplay" readonly class="w-full bg-pink-50 border border-pink-300 rounded-xl px-4 py-3 text-gray-700 font-medium focus:outline-none select-all" placeholder="Memuat email...">
+                <button onclick="copyEmail()" class="bg-rose-500 hover:bg-rose-600 text-white px-5 rounded-xl font-medium transition active:scale-95 shadow-md shadow-rose-200">Salin</button>
+            </div>
+            <p id="copyAlert" class="text-xs text-rose-500 mt-1 hidden text-right">Berhasil disalin ke clipboard!</p>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="flex gap-3 mb-6">
+            <button onclick="fetchInbox()" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-xl font-medium transition active:scale-95 shadow-md shadow-pink-200">🔄 Cek Kotak Masuk</button>
+            <button onclick="generateEmail()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-medium transition active:scale-95">Ganti Baru</button>
+        </div>
+
+        <!-- Daftar Pesan / Inbox -->
+        <div>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="font-semibold text-gray-700 text-sm">Kotak Masuk (Inbox)</h2>
+                <span id="statusText" class="text-xs text-gray-400">Siap menerima pesan</span>
+            </div>
+            
+            <div id="inboxList" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+                <div class="text-center py-8 text-gray-400 text-sm bg-pink-50/50 rounded-xl border border-dashed border-pink-200">
+                    Belum ada email masuk. Pesan akan muncul di sini secara otomatis.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLogin = "";
+        let currentDomain = "";
+        const proxyUrl = "https://api.allorigins.win/raw?url=";
+
+        async function generateEmail() {
+            try {
+                document.getElementById('statusText').innerText = "Membuat email...";
+                const targetUrl = encodeURIComponent('https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1');
+                const res = await axios.get(proxyUrl + targetUrl);
+                const fullEmail = res.data[0];
+                const parts = fullEmail.split('@');
+                currentLogin = parts[0];
+                currentDomain = parts[1];
+
+                document.getElementById('emailDisplay').value = fullEmail;
+                document.getElementById('statusText').innerText = "Menunggu pesan...";
+                document.getElementById('inboxList').innerHTML = `
+                    <div class="text-center py-6 text-gray-400 text-sm bg-pink-50/50 rounded-xl border border-dashed border-pink-200">
+                        Kotak masuk kosong. Klik "Cek Kotak Masuk" untuk memperbarui.
+                    </div>
+                `;
+            } catch (err) {
+                document.getElementById('statusText').innerText = "Gagal membuat email!";
+            }
+        }
+
+        async function fetchInbox() {
+            if (!currentLogin) return;
+            try {
+                document.getElementById('statusText').innerText = "Memeriksa...";
+                const targetUrl = encodeURIComponent(https://www.1secmail.com/api/v1/?action=getMessages&login=${currentLogin}&domain=${currentDomain});
+                const res = await axios.get(proxyUrl + targetUrl);
+                const messages = res.data;
+                const inboxList = document.getElementById('inboxList');
+
+                if (messages.length === 0) {
+                    inboxList.innerHTML = `
+                        <div class="text-center py-6 text-gray-400 text-sm bg-pink-50/50 rounded-xl border border-dashed border-pink-200">
+                            Belum ada email masuk.
+                        </div>
+                    `;
+                } else {
+                    inboxList.innerHTML = "";
+                    messages.forEach(msg => {
+                        inboxList.innerHTML += `
+                            <div class="bg-white p-4 rounded-xl border border-pink-100 shadow-sm hover:shadow transition cursor-pointer" onclick="readMessage('${msg.id}')">
+                                <div class="text-xs text-rose-500 font-semibold truncate">${msg.from}</div>
+                                <div class="text-sm font-bold text-gray-800 truncate">${msg.subject}</div>
+                                <div class="text-xs text-gray-400 mt-1">${msg.date}</div>
+                            </div>
+                        `;
+                    });
+                }
+                document.getElementById('statusText').innerText = "Diperbarui";
+            } catch (err) {
+                document.getElementById('statusText').innerText = "Gagal memuat pesan";
+            }
+        }
+
+        async function readMessage(id) {
+            try {
+                const targetUrl = encodeURIComponent(https://www.1secmail.com/api/v1/?action=readMessage&login=${currentLogin}&domain=${currentDomain}&id=${id});
+                const res = await axios.get(proxyUrl + targetUrl);
+                const data = res.data;
+                alert(Dari: ${data.from}\nSubjek: ${data.subject}\n\nPesan:\n${data.textBody || data.htmlBody});
+            } catch (err) {
+                alert("Gagal membaca isi pesan.");
+            }
+        }
+
+        function copyEmail() {
+            const copyText = document.getElementById('emailDisplay');
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            
+            const alertBox = document.getElementById('copyAlert');
+            alertBox.classList.remove('hidden');
+            setTimeout(() => alertBox.classList.add('hidden'), 2000);
+        }
+
+        generateEmail();
+        setInterval(() => { if (currentLogin) fetchInbox(); }, 15000);
+    </script>
+</body>
 </html>
