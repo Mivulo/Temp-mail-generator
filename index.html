@@ -47,11 +47,13 @@
     <script>
         let currentLogin = "";
         let currentDomain = "";
+        const proxyUrl = "https://api.allorigins.win/raw?url=";
 
         async function generateEmail() {
             try {
                 document.getElementById('statusText').innerText = "Membuat email...";
-                const res = await axios.get('https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1');
+                const targetUrl = encodeURIComponent('https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1');
+                const res = await axios.get(proxyUrl + targetUrl);
                 const fullEmail = res.data[0];
                 const parts = fullEmail.split('@');
                 currentLogin = parts[0];
@@ -73,7 +75,8 @@
             if (!currentLogin) return;
             try {
                 document.getElementById('statusText').innerText = "Memeriksa...";
-                const res = await axios.get(https://www.1secmail.com/api/v1/?action=getMessages&login=${currentLogin}&domain=${currentDomain});
+                const targetUrl = encodeURIComponent(https://www.1secmail.com/api/v1/?action=getMessages&login=${currentLogin}&domain=${currentDomain});
+                const res = await axios.get(proxyUrl + targetUrl);
                 const messages = res.data;
                 const inboxList = document.getElementById('inboxList');
 
@@ -103,7 +106,8 @@
 
         async function readMessage(id) {
             try {
-                const res = await axios.get(https://www.1secmail.com/api/v1/?action=readMessage&login=${currentLogin}&domain=${currentDomain}&id=${id});
+                const targetUrl = encodeURIComponent(https://www.1secmail.com/api/v1/?action=readMessage&login=${currentLogin}&domain=${currentDomain}&id=${id});
+                const res = await axios.get(proxyUrl + targetUrl);
                 const data = res.data;
                 alert(Dari: ${data.from}\nSubjek: ${data.subject}\n\nPesan:\n${data.textBody || data.htmlBody});
             } catch (err) {
