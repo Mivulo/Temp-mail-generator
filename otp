@@ -73,7 +73,7 @@
 
                 // 2. Buat akun email random
                 let username = Math.random().toString(36).substring(2, 10);
-                currentEmail = username + "@" + domain;
+                currentEmail = suffix + "@" + domain;
                 currentPassword = Math.random().toString(36).substring(2, 12);
 
                 let createRes = await fetch('https://api.mail.tm/accounts', {
