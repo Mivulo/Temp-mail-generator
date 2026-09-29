@@ -61,7 +61,7 @@
         function generateEmail() {
             let prefix = Math.random().toString(36).substring(2, 8);
             let suffix = Math.random().toString(36).substring(2, 8);
-            currentEmail = random medium + "@mivylo.my.id";
+            currentEmail = prefix + suffix + "@mivylo.my.id";
             
             document.getElementById('emailDisplay').value = currentEmail;
             document.getElementById('inboxList').innerHTML = "Belum ada email masuk. Pesan akan muncul di sini secara otomatis.";
