@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PinkTempMail - Mivylo</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #ffe4e1, #ffc0cb); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(219, 112, 147, 0.2); width: 100%; max-width: 480px; border: 1px solid #ffb6c1; }
+        h1 { color: #d81b60; text-align: center; margin-bottom: 8px; font-size: 24px; }
+        p.sub { text-align: center; color: #666; font-size: 13px; margin-bottom: 25px; }
+        label { font-size: 11px; font-weight: 700; color: #e91e63; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 8px; }
+        input { width: 100%; padding: 12px 15px; border: 1px solid #ffb6c1; border-radius: 12px; font-size: 14px; background: #fff5f7; color: #333; outline: none; font-weight: 500; }
+        button { padding: 12px 20px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 14px; }
+        .btn-copy { background: #e91e63; color: white; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3); }
+        .btn-copy:hover { background: #c2185b; }
+        .btn-action { background: #e91e63; color: white; width: 100%; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3); }
+        .btn-action:hover { background: #c2185b; }
+        .btn-refresh { background: #f8f9fa; color: #555; width: 100%; border: 1px solid #ddd; }
+        .btn-refresh:hover { background: #e9ecef; }
+        .inbox { margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .inbox-header h3 { font-size: 14px; color: #333; }
+        #statusText { font-size: 12px; color: #888; text-align: right; margin-bottom: 20px; }
+        .inbox-list { background: #fff9fa; border: 2px dashed #ffb6c1; border-radius: 12px; padding: 15px; text-align: left; color: #444; font-size: 13px; max-height: 200px; overflow-y: auto; }
+        .email-item { padding: 8px 10px; border-bottom: 1px solid #ffd1dc; cursor: pointer; }
+        .email-item:hover { background: #ffe6eb; border-radius: 8px; }
+        #copyAlert { font-size: 11px; color: #e91e63; text-align: right; margin-top: 5px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>🌸 Mivylo Temp Mail</h1>
+        <p class="sub">Email sementara aktif & bisa terima OTP.</p>
+
+        <label>Alamat Email Anda</label>
+        <div class="input-group">
+            <input type="text" id="emailDisplay" readonly value="Menghubungkan ke server...">
+            <button class="btn-copy" onclick="copyEmail()">Salin</button>
+        </div>
+        <div id="copyAlert">Berhasil disalin ke clipboard!</div>
+        <div id="statusText">Memuat kotak masuk...</div>
+
+        <button class="btn-action" onclick="fetchInbox()">🔄 Cek Kotak Masuk</button>
+        <button class="btn-refresh" onclick="initTempMail()">Ganti Email Baru</button>
+
+        <div class="inbox">
+            <div class="inbox-header">
+                <h3>Kotak Masuk (Inbox)</h3>
+            </div>
+            <div id="inboxList" class="inbox-list">
+                Belum ada email masuk. Pesan akan muncul di sini.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEmail = "";
+        let currentPassword = "";
+        let token = "";
+
+        async function initTempMail() {
+            document.getElementById('emailDisplay').value = "Membuat email...";
+            document.getElementById('statusText').innerText = "Menghubungkan...";
+            try {
+                // 1. Ambil domain yang tersedia dari Mail.tm
+                let domainRes = await fetch('https://api.mail.tm/domains');
+                let domains = await domainRes.json();
+                let domain = domains['hydra:member'][0].domain;
+
+                // 2. Buat akun email random
+                let username = Math.random().toString(36).substring(2, 10);
+                currentEmail = username + "@" + domain;
+                currentPassword = Math.random().toString(36).substring(2, 12);
+
+                let createRes = await fetch('https://api.mail.tm/accounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: currentEmail, password: currentPassword })
+                });
+
+                if (!createRes.ok) throw new Error("Gagal membuat akun email");
+
+                // 3. Login untuk dapat token akses inbox
+                let tokenRes = await fetch('https://api.mail.tm/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: currentEmail, password: currentPassword })
+                });
+                let tokenData = await tokenRes.json();
+                token = tokenData.token;
+
+                document.getElementById('emailDisplay').value = currentEmail;
+                document.getElementById('statusText').innerText = "Siap menerima OTP/Pesan";
+                document.getElementById('inboxList').innerHTML = "Belum ada email masuk. Klik 'Cek Kotak Masuk' untuk memuat pesan.";
+            } catch (e) {
+                document.getElementById('emailDisplay').value = "Gagal memuat";
+                document.getElementById('statusText').innerText = "Coba klik Ganti Email Baru";
+            }
+        }
+
+        async function fetchInbox() {
+            if (!token) {
+                initTempMail();
+                return;
+            }
+            document.getElementById('statusText').innerText = "Memeriksa pesan...";
+            try {
+                let res = await fetch('https://api.mail.tm/messages', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                let data = await res.json();
+                let messages = data['hydra:member'];
+
+                let inboxList = document.getElementById('inboxList');
+                if (messages.length === 0) {
+                    inboxList.innerHTML = "Belum ada email masuk. Pesan akan muncul di sini.";
+                    document.getElementById('statusText').innerText = "Kotak Masuk Kosong";
+                } else {
+                    inboxList.innerHTML = "";
+                    messages.forEach(msg => {
+                        let div = document.createElement('div');
+                        div.className = 'email-item';
+                        div.innerHTML = <b>Dari:</b> ${msg.from.address}<br><b>Subjek:</b> ${msg.subject};
+                        div.onclick = () => readMessage(msg.id);
+                        inboxList.appendChild(div);
+                    });
+                    document.getElementById('statusText').innerText = ${messages.length} pesan baru ditemukan!;
+                }
+            } catch (e) {
+                document.getElementById('statusText').innerText = "Gagal mengambil pesan.";
+            }
+        }
+
+        async function readMessage(id) {
+            let res = await fetch(https://api.mail.tm/messages/${id}, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            let msg = res.json();
+            msg.then(m => {
+                alert(Isi Pesan:\n\nDari: ${m.from.address}\nSubjek: ${m.subject}\n\n${m.text || m.intro});
+            });
+        }
+
+        function copyEmail() {
+            const copyText = document.getElementById('emailDisplay');
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            
+            const alertBox = document.getElementById('copyAlert');
+            alertBox.style.display = 'block';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 2000);
+        }
+
+        // Jalankan saat pertama buka web
+        initTempMail();
+    </script>
+</body>
+</html>
