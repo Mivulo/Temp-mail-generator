@@ -8,7 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
 </head>
 <body class="bg-gradient-to-br from-pink-100 via-rose-100 to-pink-200 min-h-screen flex items-center justify-center p-4">
-<div class="bg-white/90 backdrop-blur-md shadow-xl rounded-2xl w-full max-w-lg p-6 md:p-8 border border-pink-200">
+
+    <div class="bg-white/90 backdrop-blur-md shadow-xl rounded-2xl w-full max-w-lg p-6 md:p-8 border border-pink-200">
         <h1 class="text-2xl font-bold text-rose-600 text-center mb-2">🌸 Mivylo Temp Mail</h1>
         <p class="text-gray-500 text-center text-sm mb-6">Email sementara instan, aman, dan estetik.</p>
 
@@ -46,7 +47,7 @@
     <script>
         let currentLogin = "";
         let currentDomain = "";
-        const proxyUrl = "https://api.allorigins.win/raw?url=";
+        const proxyUrl = "https://corsproxy.io/?";
 
         async function generateEmail() {
             try {
@@ -74,7 +75,7 @@
             if (!currentLogin) return;
             try {
                 document.getElementById('statusText').innerText = "Memeriksa...";
-                const targetUrl = encodeURIComponent(https://www.1secmail.com/api/v1/?action=getMessages&login=${currentLogin}&domain=${currentDomain});
+                const targetUrl = encodeURIComponent(`https://www.1secmail.com/api/v1/?action=getMessages&login=${currentLogin}&domain=${currentDomain}`);
                 const res = await axios.get(proxyUrl + targetUrl);
                 const messages = res.data;
                 const inboxList = document.getElementById('inboxList');
@@ -105,10 +106,10 @@
 
         async function readMessage(id) {
             try {
-                const targetUrl = encodeURIComponent(https://www.1secmail.com/api/v1/?action=readMessage&login=${currentLogin}&domain=${currentDomain}&id=${id});
+                const targetUrl = encodeURIComponent(`https://www.1secmail.com/api/v1/?action=readMessage&login=${currentLogin}&domain=${currentDomain}&id=${id}`);
                 const res = await axios.get(proxyUrl + targetUrl);
                 const data = res.data;
-                alert(Dari: ${data.from}\nSubjek: ${data.subject}\n\nPesan:\n${data.textBody || data.htmlBody});
+                alert(`Dari: ${data.from}\nSubjek: ${data.subject}\n\nPesan:\n${data.textBody || data.htmlBody}`);
             } catch (err) {
                 alert("Gagal membaca isi pesan.");
             }
